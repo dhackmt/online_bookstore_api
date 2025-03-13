@@ -3,62 +3,99 @@ import IUserService from "../interface/userServiceInterface";
 import User from "../models/userModel";
 import {v4 as uuidv4} from "uuid";
 import { createToken, verifyToken } from "../common/auth";
+import Admin from "../models/adminModel";
 
 @injectable()
-class UserService implements IUserService
-{
-    addUser=async(requestObject: any): Promise<any>=> {
-        try{
-            const {email,password}=requestObject.body;
-            console.log(email,password);
-            const id=uuidv4();
-            console.log(`Id is ${id}`);
-            const hashedPassword=await User.hashPassword(password);
-            
-            const existingUser=await User.findOne({where:{email}});
-            if(existingUser)
-            {
-                return {message:"user already exists!"};
-            }
-            const user=await User.create({
-                userId:id,
-                email:email,
-                password:hashedPassword
-            });
-            const token=await createToken(email,id,"user");
-            return {message:`user created successfully ${user} here is your token ${token}`};
-        }
-        catch(error)
-        {
-            return error;
-        }
-    }
+class UserService implements IUserService {
+  register = async (requestObject: any): Promise<any> => {
+    try {
+      const { email, password } = requestObject.body;
+      const role = requestObject.path.includes("/admin") ? "admin" : "user";
+      let Model;
+      if (role == "admin") {
+        Model = Admin;
+      } else {
+        Model = User;
+      }
 
-    loginUser=async(requestObject: any): Promise<any> =>{
-        try{
-            const {email,password}=requestObject.body;
-            
-            const existingUser=await User.findOne({where:{email:email}});
-           
-            if(!existingUser)
-            {
-                return {message:"No such user found"};
-            }
-            const token=await createToken(existingUser.email,existingUser.userId,"user");
-            const storedPassword=existingUser.password;
-            console.log(token);
-            const hashedPassword=await User.comparePassword(password,storedPassword);
-            if(!hashedPassword)
-            {
-                return {message:"Password does not match!"};
-            }
-            return {message:`Login successfull ${token}`};
-        }
-        catch(error)
-        {
-            return {message:"Error in loging user in"};
-        }
+      return this.registerUser(Model, email, password, role);
+    } catch (error) {
+      return error;
     }
+  };
+
+  private async registerUser(
+    Model: any,
+    email: string,
+    password: string,
+    role: string
+  ) {
+    try {
+      const id = uuidv4();
+      const hashedPassword = await Model.hashPassword(password);
+      let idField;
+      const existingUser = await Model.findOne({ where: { email: email } });
+      if (existingUser) {
+        return { message: "User already exists!" };
+      }
+
+      const user = await Model.create({
+        id: id,
+        email: email,
+        password: hashedPassword,
+      });
+      const token = await createToken(email, id, role);
+      return {
+        message: `user created successfully ${user} here is your token ${token}`,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  login = async (requestObject: any): Promise<any> => {
+    try {
+      const { email, password } = requestObject.body;
+      const role = requestObject.path.includes("/admin") ? "admin" : "user";
+      let Model;
+
+      if (role == "admin") {
+        Model = Admin;
+      } else {
+        Model = User;
+      }
+      return this.loginUser(Model, email, password, role);
+    } catch (error) {
+      return { message: "Error in loging user in" };
+    }
+  };
+
+  private async loginUser(
+    Model: any,
+    email: string,
+    password: string,
+    role: string
+  ) {
+    try {
+      const existingUser = await Model.findOne({ where: { email: email } });
+      if (!existingUser) {
+        return { message: "User does not exists" };
+      }
+      const hashedPassword = await Model.comparePassword(
+        password,
+        existingUser.password
+      );
+      if (!hashedPassword) {
+        return { message: "Password does not match" };
+      }
+
+      const token = await createToken(email, existingUser.id, role);
+
+      return { message: `login successfull ${token}` };
+    } catch (error) {
+      return error;
+    }
+  }
 }
 
 export default UserService;

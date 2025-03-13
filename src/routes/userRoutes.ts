@@ -13,8 +13,12 @@ class userRoute{
     }
 
     configureRoutes(){
-        this.router.post("/addUser",(req:Request,res:Response)=>this.userController.addUser(req,res));
-        this.router.post("/login",(req:Request,res:Response)=>this.userController.loginUser(req,res));
+        this.router.post("/register", (req: Request, res: Response) =>
+          this.userController.register(req, res)
+        );
+        this.router.post("/login", (req: Request, res: Response) =>
+          this.userController.login(req, res)
+        );
     }
 
     getRouter():Router{

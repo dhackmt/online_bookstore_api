@@ -6,9 +6,9 @@ import IUserService from "../interface/userServiceInterface";
 class UserController
 {
     constructor(private readonly userService:IUserService){}
-    addUser=async(req:Request,res:Response):Promise<any>=>{
+    register=async(req:Request,res:Response):Promise<any>=>{
         try{
-               const result:any=await this.userService.addUser(req);
+               const result:any=await this.userService.register(req);
                res.status(200).json(result);
         }
         catch(error)
@@ -17,9 +17,9 @@ class UserController
         }
     }
 
-    loginUser=async(req:Request,res:Response):Promise<any>=>{
+    login=async(req:Request,res:Response):Promise<any>=>{
         try{
-                const result=await this.userService.loginUser(req);
+                const result=await this.userService.login(req);
                 res.status(200).json(result);
         }
         catch(error)

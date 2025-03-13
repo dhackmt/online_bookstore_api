@@ -28,10 +28,25 @@ app.get("/",authMiddleware("admin") ,(req:Request , res: Response) => {
 })
 ;
 app.use("/user",userRouteInstance.getRouter());
+app.use("/admin", userRouteInstance.getRouter());
 
-sequelize.authenticate().then(()=>{console.log("Database connected")}).catch(()=>{console.log("Error in connecting to database")});
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("Database connected");
+  })
+  .catch(() => {
+    console.log("Error in connecting to database");
+  });
 
-sequelize.sync().then(()=>{console.log("Database synced")}).catch(()=>{console.log("Error in database sync")});
+sequelize
+  .sync()
+  .then(() => {
+    console.log("Database synced");
+  })
+  .catch(() => {
+    console.log("Error in database sync");
+  });
 
 app.listen(3000,()=>{
     console.log(`Server is running on port ${PORT}`)
