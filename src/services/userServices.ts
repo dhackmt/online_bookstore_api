@@ -10,7 +10,7 @@ class UserService implements IUserService {
   register = async (requestObject: any): Promise<any> => {
     try {
       const { email, password } = requestObject.body;
-      const role = requestObject.path.includes("/admin") ? "admin" : "user";
+      const role = requestObject.baseUrl.includes("/admin") ? "admin" : "user";
       let Model;
       if (role == "admin") {
         Model = Admin;
@@ -56,7 +56,8 @@ class UserService implements IUserService {
   login = async (requestObject: any): Promise<any> => {
     try {
       const { email, password } = requestObject.body;
-      const role = requestObject.path.includes("/admin") ? "admin" : "user";
+      console.log(requestObject.baseUrl);
+      const role = requestObject.baseUrl.includes("/admin") ? "admin" : "user";
       let Model;
 
       if (role == "admin") {
