@@ -5,127 +5,122 @@ import { fetchBookFromAPI } from "../utils/fetchBookFromAPI";
 import { addBooksToDB, deleteBook, getAllBooks,getBookById, replaceAsync } from "../database/databaseServices";
 import { v4 as uuidv4 } from "uuid";
 import BookDTO from "../dto/BookDTO";
+import {
+  generateErrorResponse,
+  generateSuccessResponse,
+} from "../utils/responseUtil";
 
 @injectable()
-class BookService implements IBookService
-{
-    getBooks=async(requestObject: Request): Promise<any>=>{
-        try{
-                const books:any=await getAllBooks();
-                console.log(books);
+class BookService implements IBookService {
+  getBooks = async (requestObject: Request): Promise<any> => {
+    try {
+      const books: any = await getAllBooks();
 
-                if(books.length==0)
-                {
-                    return `No records found`;
-                }
-                const responseData=books.map((book:any)=>{
-                    return new BookDTO(book);
-                });
-                
-                console.log(responseData);
-                return responseData;
+      if (books.length == 0) {
+        return await generateSuccessResponse("No data found");
+      }
+      const responseData = books.map((book: any) => {
+        return new BookDTO(book);
+      });
 
-        }
-        catch(error)
-        {
-            return error;
-        }
+      return await generateSuccessResponse(responseData);
+    } catch (error: any) {
+      return await generateErrorResponse(500, error.message);
     }
+  };
 
-    addBooks=async(requestObject: Request): Promise<any>=>{
-        try
-        {
-            const body=requestObject.body;
-            const bookId=uuidv4();
-            
-            const externalBookData=await fetchBookFromAPI(body.title);
-      
-            const date=externalBookData?.volumeInfo.publishedDate;
-            console.log(date.split("-")[0]);
-            const publishedYear=externalBookData? parseInt(date.split("-")[0]) : new Date().getFullYear();
-            const description=externalBookData ? externalBookData.volumeInfo.description : "no description for this book" ;
+  addBooks = async (requestObject: Request): Promise<any> => {
+    try {
+      const body = requestObject.body;
+      const bookId = uuidv4();
 
-            const bookData={
-                id:bookId, 
-                uuid:bookId,
-                bookCode:body.bookCode, 
-                title:body.title,
-                description:description, 
-                publishedYear:publishedYear,
-                price:body.price,
-                authors:body.authors,
-                externalId:externalBookData.id
-            }   
-            const data=await addBooksToDB(bookData);
-            console.log(data);
-            if(!data)
-            {
-                return `error in adding book ${data}`;
-            }
-            return `Book added successfully ${JSON.stringify(data)}`;
-        }
-        catch(error)
-        {
-            return {message:`error in adding books to database ${error}`};
-        }
+      const externalBookData = await fetchBookFromAPI(body.title);
+
+      const date = externalBookData?.volumeInfo.publishedDate;
+
+      const publishedYear = externalBookData
+        ? parseInt(date.split("-")[0])
+        : new Date().getFullYear();
+      const description = externalBookData
+        ? externalBookData.volumeInfo.description
+        : "no description for this book";
+
+      const bookData = {
+        id: bookId,
+        uuid: bookId,
+        bookCode: body.bookCode,
+        title: body.title,
+        description: description,
+        publishedYear: publishedYear,
+        price: body.price,
+        authors: body.authors,
+        externalId: externalBookData.id,
+      };
+      const data = await addBooksToDB(bookData);
+      const response = new BookDTO(data);
+      if (!data) {
+        return await generateErrorResponse(500, "Data not added to DB");
+      }
+      return await generateSuccessResponse(response);
+    } catch (error: any) {
+      return await generateErrorResponse(500, error.message);
     }
+  };
 
-    getBookById=async(requestObject: Request): Promise<any>=> {
-        try{
-            if(!requestObject.params.id)
-            {
-                return `Book id required! missing parameteres`;
-            }
-            const id=requestObject.params.id;
-            console.log(id);
-            const data=await getBookById(id);
-            const response=new BookDTO(data);
-            return response;
+  getBookById = async (requestObject: Request): Promise<any> => {
+    try {
+      if (!requestObject.params.id) {
+        return await generateErrorResponse(
+          400,
+          "Invalid Parameters! Id required"
+        );
+      }
+      const id = requestObject.params.id;
 
-        }
-        catch(error)
-        {
-            return `error in fetching particular book ${error}`;
-        }
+      const data = await getBookById(id);
+      const response = new BookDTO(data);
+
+      return await generateSuccessResponse(response);
+    } catch (error: any) {
+      return await generateErrorResponse(500, error.message);
     }
+  };
 
-    updateBook=async(requestObject: Request): Promise<any>=> {
-        try{
-            if(!requestObject.params.id || !requestObject.body.price)
-            {
-                return `missing parameters required id and new price both`;
-            }
-            const id=requestObject.params.id;
-            const price=requestObject.body.price;
+  updateBook = async (requestObject: Request): Promise<any> => {
+    try {
+      if (!requestObject.params.id || !requestObject.body.price) {
+        return await generateErrorResponse(
+          400,
+          "Invalid Parameters! Id and price required"
+        );
+      }
+      const id = requestObject.params.id;
+      const price = requestObject.body.price;
 
-            const updateRecord=await replaceAsync(id,price);
-          
-            const response=new BookDTO(updateRecord);
-            return response;
-        }
-        catch(error)
-        {
-            return `error in updating book ${error}`;
-        }
+      const updateRecord = await replaceAsync(id, price);
+
+      const response = new BookDTO(updateRecord);
+      return await generateSuccessResponse(response);
+    } catch (error: any) {
+      return await generateErrorResponse(500, error.message);
     }
+  };
 
-    deleteBook=async(requestObject: Request): Promise<any>=> {
-        try{
-            if(!requestObject.params.id)
-            {
-                return "Missing parameters , id required!";
-            }
-            const id=requestObject.params.id;
-            const deleteRecord=await deleteBook(id);
-            console.log(deleteRecord);
-            return "Book deleted Successfully!";
-        }
-        catch(error)
-        {
-            return `error in deleteing record ${error}`
-        }
+  deleteBook = async (requestObject: Request): Promise<any> => {
+    try {
+      if (!requestObject.params.id) {
+        return await generateErrorResponse(
+          400,
+          "Invalid Parameters! Id required"
+        );
+      }
+      const id = requestObject.params.id;
+      const deleteRecord = await deleteBook(id);
+      return await generateSuccessResponse("Record deleted!");
+    } catch (error: any) {
+      return await generateErrorResponse(500, error.message);
     }
-
+  };
 }
 
 export default BookService;

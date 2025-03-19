@@ -13,15 +13,15 @@ class BookDTO{
     constructor(props:any)
     {
         this.message="This is Book Data";
-        this.id=props.id;
-        this.uuid=props.uuid;
-        this.bookCode=props.bookCode;
-        this.title=props.title;
-        this.description=props.description;
-        this.publishedYear=props.publishedYear;
-        this.price=props.price;
-        this.authors=props.authors;
-        this.externalId=props.externalId
+        this.id = props.id || "";
+        this.uuid = props.uuid || "";
+        this.bookCode = props.bookCode || "";
+        this.title = props.title || "";
+        this.description = props.description || "";
+        this.publishedYear = props.publishedYear || "";
+        this.price = props.price || "";
+        this.authors = props.authors || "";
+        this.externalId = props.externalId || "";
     }
 }
 
