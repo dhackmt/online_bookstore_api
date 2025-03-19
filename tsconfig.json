@@ -11,6 +11,8 @@
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "resolveJsonModule": true,
+  
   },
   "include": [
     "src/**/*.ts"
