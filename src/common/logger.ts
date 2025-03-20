@@ -1,104 +1,85 @@
-import winston from 'winston';
-import axios from 'axios';
+import { timeStamp } from "console";
+import winston from "winston";
 import dotenv from "dotenv";
+import axios from "axios";
 
 dotenv.config();
 
-type LogLevel='error' | 'warn' | 'info' | 'debug';
-
-interface LogParams{
-    message:string;
-    error?: Error | unknown;
-    context?: Record<string,any>;
+interface LogParams {
+  message: string;
+  error?: Error;
+  context?: Record<string, any>;
 }
 
-export class DataDogLogger{
-    private readonly dataDogAPiUrl:string;
-    private readonly dataDogApiKey:string;
-    private logger:winston.Logger;
+type LogLevel = "error" | "info" | "warn" | "debug";
+export class Logger {
+  private logger: winston.Logger;
+  private readonly dataDogApiUrl = process.env.DATADOG_API_URL || "";
+  private readonly dataDogApiKey = process.env.DATADOG_API_KEY || "";
 
-    constructor(){
-        this.dataDogAPiUrl=process.env.DATADOG_API_URL || '';
-        this.dataDogApiKey=process.env.DATADOG_API_KEY || '';
+  constructor() {
+    this.logger = winston.createLogger({
+      level: "info",
+      format: winston.format.json(),
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.simple(),
+        }),
+      ],
+    });
+  }
 
-        
-    // const httpTransportOptions = {
-    //     host: 'http-intake.logs.datadoghq.com',
-    //     path: '/api/v2/logs?dd-api-key=<DATADOG_API_KEY>&ddsource=nodejs&service=<APPLICATION_NAME>',
-    //     ssl: true
-    // };
-        this.logger=winston.createLogger({
-            level:'info',
-            format:winston.format.json(),
-            transports:[
-                new winston.transports.Console({
-                    format:winston.format.simple(),
-                }),
-            ],
-        });
-    }
-    private async sendToDatadog(level:LogLevel,message:string,context:Record<string,any>={})
-    {
-        try{
-            await axios.post(this.dataDogAPiUrl,{
-                ddsource:'nodejs',
-                service:'Assignment6',
-                hostname:"local",
-                status:level,
-                message,
-                context,
-            },{
-                headers:{
-                    'Content-Type':'application/json',
-                    'DD-API_KEY':this.dataDogApiKey,
-                },
-            });
-        }
-        catch(error)
+  private async sendToDatadog(
+    level: LogLevel,
+    message: string,
+    context: Record<string, any> = {}
+  ) {
+    try {
+      await axios.post(
+        this.dataDogApiUrl,
         {
-            console.error('Failed to send log to dataDog',error);
+          ddSource: "nodejs",
+          service: "assignment-6",
+          hostname: "local",
+          status: level,
+          message,
+          context,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "DD-API-KEY": this.dataDogApiKey,
+          },
         }
+      );
+    } catch (error: any) {
+      console.log(error.message);
     }
-    public async log({message,error,context={}}:LogParams,level:LogLevel="info"){
-        const logContext={
-            error:error instanceof Error ? error.stack:error,
-            timestamp:new Date().toISOString(),
-            ...context,
-        };
-        this.logger.log(level,message,logContext);
-        await this.sendToDatadog(level,message,logContext);
- }
-   public async info(params:LogParams)
-   {
-    await this.log(params,'info');
-   }
-   public async error(params:LogParams)
-   {
-    await this.log(params,'error');
-   }
-   public async warn(params:LogParams)
-   {
-    await this.log(params,'warn');
-   }
-   public async debug(params:LogParams)
-   {
-    await this.log(params,'debug');
-   }
+  }
+
+  public async log(
+    level: "info" | "error" | "warn" | "debug",
+    { message, error, context = {} }: LogParams
+  ) {
+    const logContext = {
+      error: error instanceof Error ? error.stack : error,
+      timeStamp: new Date().toISOString,
+      ...context,
+    };
+    this.logger.log(level, message, logContext);
+    await this.sendToDatadog(level, message, context);
+  }
+
+  public async info(params: LogParams) {
+    await this.log("info", params);
+  }
+  public async warn(params: LogParams) {
+    await this.log("warn", params);
+  }
+  public async debug(params: LogParams) {
+    await this.log("debug", params);
+  }
+  public async error(params: LogParams) {
+    await this.log("error", params);
+  }
 }
-
-// import { createLogger,transports,format } from "winston";
-
-//     const httpTransportOptions = {
-//         host: 'http-intake.logs.datadoghq.com',
-//         path: '/api/v2/logs?dd-api-key=<55d19128b7e52fbf0dd0a911501f815a>&ddsource=nodejs&service=<Assignment6>',
-//         ssl: true
-//     };
-
-// export const logger = createLogger({
-//   level: 'info',
-//   exitOnError: false,
-//   format: format.json(),
-//   transports: [
-//     new transports.Http(httpTransportOptions),
-//   ],
-// });

@@ -14,11 +14,13 @@ import BookService from "./services/bookService";
 import BookController from "./controllers/bookController";
 import { BookRoute } from "./routes/bookRoutes";
 // import { logger } from "./common/loggerInstance";
+import { Logger } from "./common/logger";
 
 dotenv.config();
 const PORT = process.env.PORT;
 const container = new Container();
 
+const logger = new Logger();
 const app = express();
 app.use(express.json());
 
@@ -62,12 +64,11 @@ sequelize
     console.log("Error in database sync");
   });
 
-  if(process.env.NODE_ENV!=="test")
-  {
-    app.listen(3000, async () => {
-      // await logger.info({ message: `server running on port ${PORT}` });
-      console.log(`Server is running on port ${PORT}`);
-    });
-  }
+if (process.env.NODE_ENV !== "test") {
+  app.listen(3000, async () => {
+    await logger.info({ message: `server running on port ${PORT}` });
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 export {app,container}
