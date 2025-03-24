@@ -7,12 +7,14 @@ import UserController from "./controllers/userController";
 import { userRoute } from "./routes/userRoutes";
 import sequelize from "./database/dbConfig";
 import { Request, Response } from "express";
-import bodyParser from "body-parser";
-import { authMiddleware } from "./common/authMiddleware";
 import { IBookService } from "./interface/bookServiceInterface";
 import BookService from "./services/bookService";
 import BookController from "./controllers/bookController";
 import { BookRoute } from "./routes/bookRoutes";
+import { IReviewService } from "./interface/reviewServiceInterface";
+import ReviewService from "./services/reviewServices";
+import ReviewController from "./controllers/reviewController";
+import { ReviewRoute } from "./routes/reviewRoute";
 // import { logger } from "./common/loggerInstance";
 
 dotenv.config();
@@ -28,7 +30,7 @@ const userService = container.get<IUserService>("IUserService");
 const userController = new UserController(userService);
 const userRouteInstance = new userRoute(userController);
 
-app.get("/", authMiddleware("admin"), (req: Request, res: Response) => {
+app.get("/", (req: Request, res: Response) => {
   res.send("API is running");
 });
 app.use("/user", userRouteInstance.getRouter());
@@ -40,6 +42,14 @@ container.bind<IBookService>("IBookService").to(BookService);
 const bookService = container.get<IBookService>("IBookService");
 const bookController = new BookController(bookService);
 const bookRouterInstance = new BookRoute(bookController);
+
+container.bind<IReviewService>("IReviewService").to(ReviewService);
+const reviewService = container.get<IReviewService>("IReviewService");
+const reviewController = new ReviewController(reviewService);
+const reviewRouterInstance = new ReviewRoute(reviewController);
+
+app.use("/user", reviewRouterInstance.getRouter());
+app.use("/admin", reviewRouterInstance.getRouter());
 
 app.use("/user", bookRouterInstance.getRouter());
 app.use("/admin", bookRouterInstance.getRouter());

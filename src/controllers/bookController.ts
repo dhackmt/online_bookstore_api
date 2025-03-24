@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import BookService from "../services/bookService";
 import { Request,Response } from "express";
-import { deleteBook } from "../database/databaseServices";
+
 
 @injectable()
 class BookController {
@@ -14,7 +14,7 @@ class BookController {
   getBooks = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.getBooks(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -23,7 +23,7 @@ class BookController {
   getBooksById = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.getBookById(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -32,7 +32,7 @@ class BookController {
   addBooks = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.addBooks(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -41,7 +41,7 @@ class BookController {
   updateBooks = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.updateBook(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -50,7 +50,7 @@ class BookController {
   deleteBook = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.deleteBook(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.send(500).send(error);
     }

@@ -2,17 +2,33 @@ import { injectable } from "inversify";
 import { IBookService } from "../interface/bookServiceInterface";
 import { Request } from "express";
 import { fetchBookFromAPI } from "../utils/fetchBookFromAPI";
-import { addBooksToDB, deleteBook, getAllBooks,getBookById, replaceAsync } from "../database/databaseServices";
+import {
+  addToDB,
+  deleteRecord,
+  getAllBooks,
+  getBookById,
+  replaceAsync,
+} from "../database/databaseServices";
 import { v4 as uuidv4 } from "uuid";
 import BookDTO from "../dto/BookDTO";
 import {
   generateErrorResponse,
   generateSuccessResponse,
 } from "../utils/responseUtil";
+import Book from "../models/bookModel";
+
+interface APIResponse<T> {
+  data: T;
+  message: string;
+  statusCode: number;
+  success: boolean;
+}
 
 @injectable()
 class BookService implements IBookService {
-  getBooks = async (requestObject: Request): Promise<any> => {
+  getBooks = async (
+    requestObject: Request
+  ): Promise<APIResponse<BookDTO[] | string | null>> => {
     try {
       const books: any = await getAllBooks();
 
@@ -29,9 +45,16 @@ class BookService implements IBookService {
     }
   };
 
-  addBooks = async (requestObject: Request): Promise<any> => {
+  addBooks = async (
+    requestObject: Request
+  ): Promise<APIResponse<BookDTO | string | null>> => {
     try {
       const body = requestObject.body;
+
+      if (!body.price || !body.authors || !body.bookCode || !body.title) {
+        return await generateErrorResponse(400, "Invalid parameters");
+      }
+
       const bookId = uuidv4();
 
       const externalBookData = await fetchBookFromAPI(body.title);
@@ -56,7 +79,7 @@ class BookService implements IBookService {
         authors: body.authors,
         externalId: externalBookData.id,
       };
-      const data = await addBooksToDB(bookData);
+      const data = await addToDB(bookData, Book);
       const response = new BookDTO(data);
       if (!data) {
         return await generateErrorResponse(500, "Data not added to DB");
@@ -67,7 +90,9 @@ class BookService implements IBookService {
     }
   };
 
-  getBookById = async (requestObject: Request): Promise<any> => {
+  getBookById = async (
+    requestObject: Request
+  ): Promise<APIResponse<BookDTO | string | null>> => {
     try {
       if (!requestObject.params.id) {
         return await generateErrorResponse(
@@ -78,6 +103,7 @@ class BookService implements IBookService {
       const id = requestObject.params.id;
 
       const data = await getBookById(id);
+
       const response = new BookDTO(data);
 
       return await generateSuccessResponse(response);
@@ -86,7 +112,9 @@ class BookService implements IBookService {
     }
   };
 
-  updateBook = async (requestObject: Request): Promise<any> => {
+  updateBook = async (
+    requestObject: Request
+  ): Promise<APIResponse<BookDTO | string | null>> => {
     try {
       if (!requestObject.params.id || !requestObject.body.price) {
         return await generateErrorResponse(
@@ -97,7 +125,7 @@ class BookService implements IBookService {
       const id = requestObject.params.id;
       const price = requestObject.body.price;
 
-      const updateRecord = await replaceAsync(id, price);
+      const updateRecord = await replaceAsync(id, price, Book);
 
       const response = new BookDTO(updateRecord);
       return await generateSuccessResponse(response);
@@ -106,7 +134,9 @@ class BookService implements IBookService {
     }
   };
 
-  deleteBook = async (requestObject: Request): Promise<any> => {
+  deleteBook = async (
+    requestObject: Request
+  ): Promise<APIResponse<BookDTO | string | null>> => {
     try {
       if (!requestObject.params.id) {
         return await generateErrorResponse(
@@ -115,7 +145,7 @@ class BookService implements IBookService {
         );
       }
       const id = requestObject.params.id;
-      const deleteRecord = await deleteBook(id);
+      const deleteBookRecord = await deleteRecord(id, Book);
       return await generateSuccessResponse("Record deleted!");
     } catch (error: any) {
       return await generateErrorResponse(500, error.message);
