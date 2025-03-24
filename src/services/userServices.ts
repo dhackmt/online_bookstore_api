@@ -58,6 +58,7 @@ class UserService implements IUserService {
       const { email, password } = requestObject.body;
       console.log(requestObject.baseUrl);
       const role = requestObject.baseUrl.includes("/admin") ? "admin" : "user";
+      
       let Model;
 
       if (role == "admin") {

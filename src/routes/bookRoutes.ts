@@ -12,13 +12,36 @@ class BookRoute{
         this.configureRoutes();
     }
     configureRoutes(){
-        this.router.get("/books",(req:Request,res:Response)=>this.bookController.getBooks(req,res));
-        this.router.get("/books/:id",(req:Request,res:Response)=>this.bookController.getBooksById(req,res));
-        this.router.post("/addBooks", (req: Request, res: Response) =>
-          this.bookController.addBooks(req, res)
+        this.router.get(
+          "/books",
+          authMiddleware(["admin", "user"]),
+          (req: Request, res: Response) =>
+            this.bookController.getBooks(req, res)
         );
-        this.router.put("/books/:id",authMiddleware("admin"),(req:Request,res:Response)=>this.bookController.updateBooks(req,res));
-        this.router.delete("/book/:id",authMiddleware("admin"),(req:Request,res:Response)=>this.bookController.deleteBook(req,res));
+        this.router.get(
+          "/books/:id",
+          authMiddleware(["admin", "user"]),
+          (req: Request, res: Response) =>
+            this.bookController.getBooksById(req, res)
+        );
+        this.router.post(
+          "/books",
+          authMiddleware(["admin"]),
+          (req: Request, res: Response) =>
+            this.bookController.addBooks(req, res)
+        );
+        this.router.put(
+          "/books/:id",
+          authMiddleware(["admin"]),
+          (req: Request, res: Response) =>
+            this.bookController.updateBooks(req, res)
+        );
+        this.router.delete(
+          "/book/:id",
+          authMiddleware(["admin"]),
+          (req: Request, res: Response) =>
+            this.bookController.deleteBook(req, res)
+        );
     }
 
     getRouter():Router{
