@@ -16,10 +16,16 @@ import ReviewService from "./services/reviewServices";
 import ReviewController from "./controllers/reviewController";
 import { ReviewRoute } from "./routes/reviewRoute";
 // import { logger } from "./common/loggerInstance";
+import SwaggerConfig from "./common/uploadSwagger";
+import Swagger from "./swagger";
+import swaggerUi from "swagger-ui-express";
 
 dotenv.config();
 const PORT = process.env.PORT;
 const container = new Container();
+
+const uploafFileToS3 = new SwaggerConfig();
+const swagger=new Swagger();
 
 const app = express();
 app.use(express.json());
@@ -71,6 +77,31 @@ sequelize
   .catch(() => {
     console.log("Error in database sync");
   });
+
+(async()=>{
+  try{
+    await uploafFileToS3.uploadSwaggerFile();
+    startServer();
+  }
+  catch(error)
+  {
+    console.log("Error uploading Swagger file",error);
+  }
+})();
+
+async function startServer()
+{
+  const swaggerDocument=await swagger.setUpSwagger();
+  if(swaggerDocument)
+  {
+    console.log("Swagger uploaded successfully");
+    app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(swaggerDocument));
+  }
+  else{
+    console.log("swagger document is not available");
+  }
+
+}
 
   if(process.env.NODE_ENV!=="test")
   {
