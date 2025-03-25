@@ -31,6 +31,7 @@ class Swagger{
                 {
                     console.log("Data is empty");
                 }
+                //this converts yaml (structured text) to raw yaml string
                 return data.Body?.transformToString('utf-8') ?? null;
     }
     catch(error){
@@ -45,6 +46,7 @@ class Swagger{
             console.log("failed to get swagger yaml from s3");
             return null;
         }
+        // this converts yaml raw string to javascript object
         this.swaggerDocument=YAML.parse(yamlContent);
 
         return this.swaggerDocument;
