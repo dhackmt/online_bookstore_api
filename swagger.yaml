@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Online BookStore API
+  version: 1.0.0
+  description: Rest API documentation
+
+servers:
+  -url: http://localhost:3000
+  description: Local Development
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  -BearerAuth : []  #This applies bearer token authentication globally
+
+paths:
+  /:
+    get:
+      summary: Health Check API
+      description: Returns Status of API
+      responses:
+        "200":
+          descriotion: Success
+          
