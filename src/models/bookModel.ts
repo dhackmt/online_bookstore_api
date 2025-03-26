@@ -2,6 +2,7 @@ import sequelize from "../database/dbConfig";
 import { Model,DataTypes } from "sequelize";
 import Reviews from "./reviewModel";
 import User from "./userModel";
+import Order from "./orderModel";
 
 class Book extends Model {
   public readonly id!: string;
@@ -93,5 +94,8 @@ User.hasMany(Reviews, {
 Reviews.belongsTo(Reviews, {
   foreignKey: "userId",
 });
+
+Book.hasMany(Order, { foreignKey: "bookId" });
+Order.belongsTo(Book, { foreignKey: "bookId" });
 
 export default Book;
