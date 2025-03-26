@@ -1,11 +1,12 @@
 import { injectable } from "inversify";
 import BookService from "../services/bookService";
 import { Request,Response } from "express";
-
+import { Logger } from "../common/logger";
 
 @injectable()
 class BookController {
   private bookService;
+  private logger = new Logger();
 
   constructor(bookService: BookService) {
     this.bookService = bookService;
@@ -14,8 +15,10 @@ class BookController {
   getBooks = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.getBooks(req);
+      await this.logger.info({message:"Data sent to services"});
       res.status(result.statusCode).send(result);
-    } catch (error) {
+    } catch (error: any) {
+      await this.logger.error(error.message);
       res.status(500).send(error);
     }
   };

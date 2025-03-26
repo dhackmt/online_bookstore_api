@@ -26,11 +26,13 @@ import { IPaymentService } from "./interface/paymentServiceInterface";
 import WebhookController from "./controllers/webhookController";
 import WebhookRoute from "./routes/webhookRoutes";
 // import { logger } from "./common/loggerInstance";
+import { Logger } from "./common/logger";
 
 dotenv.config();
 const PORT = process.env.PORT;
 const container = new Container();
 
+const logger = new Logger();
 const app = express();
 app.use(express.json());
 
@@ -102,10 +104,9 @@ sequelize
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(3000, async () => {
-    // await logger.info({ message: `server running on port ${PORT}` });
+    await logger.info({ message: `server running on port ${PORT}` });
     console.log(`Server is running on port ${PORT}`);
-    // const gocardless = new GoCardless();
-    // gocardless.testMandates();
+
   });
 }
 
