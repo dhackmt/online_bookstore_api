@@ -16,7 +16,7 @@ class BookController {
     try {
       const result = await this.bookService.getBooks(req);
       await this.logger.info({message:"Data sent to services"});
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error: any) {
       await this.logger.error(error.message);
       res.status(500).send(error);
@@ -26,7 +26,7 @@ class BookController {
   getBooksById = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.getBookById(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -35,7 +35,7 @@ class BookController {
   addBooks = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.addBooks(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -44,7 +44,7 @@ class BookController {
   updateBooks = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.updateBook(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.status(500).send(error);
     }
@@ -53,7 +53,7 @@ class BookController {
   deleteBook = async (req: Request, res: Response) => {
     try {
       const result = await this.bookService.deleteBook(req);
-      res.status(200).send(result);
+      res.status(result.statusCode).send(result);
     } catch (error) {
       res.send(500).send(error);
     }

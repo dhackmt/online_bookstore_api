@@ -1,6 +1,7 @@
 import { DataTypes,Model } from "sequelize";
 import sequelize from "../database/dbConfig";
 import bcrypt from "bcrypt";
+import Order from "./orderModel";
 
 class User extends Model {
   public id!: string;
@@ -10,7 +11,7 @@ class User extends Model {
   public static async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    
+
     const hashed = await bcrypt.hash(password, salt);
     return hashed;
   }
@@ -46,5 +47,8 @@ User.init(
     timestamps: true,
   }
 );
+
+User.hasMany(Order, { foreignKey: "userId" });
+Order.belongsTo(User, { foreignKey: "userId" });
 
 export default User;

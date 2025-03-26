@@ -1,5 +1,7 @@
 import { Request } from "express";
 
-export interface IReviewService{
-    getReviews(requestObject:Request):Promise<any>;
+export interface IReviewService {
+  addReviews(requestObject: Request): Promise<any>;
+  getReviews(requestObject: Request): Promise<any>;
+  deleteReviews(requestObject:Request):Promise<any>;
 }
