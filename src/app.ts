@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
-import {Container} from "inversify";
+import cors from "cors";
+import { Container } from "inversify";
 import IUserService from "./interface/userServiceInterface";
 import UserService from "./services/userServices";
 import UserController from "./controllers/userController";
@@ -35,6 +36,12 @@ const container = new Container();
 const logger = new Logger();
 const app = express();
 app.use(express.json());
+
+app.use(
+  cors({
+    exposedHeaders: ["X-Message-ID"],
+  })
+);
 
 //login and registeration
 container.bind<IUserService>("IUserService").to(UserService);

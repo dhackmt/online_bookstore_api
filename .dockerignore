@@ -1,0 +1,26 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Logs
+logs
+*.log
+debug.log
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Docker-specific files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# OS and editor files
+.DS_Store
+.vscode
+.idea
+*.swp
