@@ -27,6 +27,10 @@ import WebhookController from "./controllers/webhookController";
 import WebhookRoute from "./routes/webhookRoutes";
 // import { logger } from "./common/loggerInstance";
 import { Logger } from "./common/logger";
+import { IAuthorService } from "./interface/authorServiceInterface";
+import AuthorService from "./services/sqsService";
+import AuthorController from "./controllers/AuthorController";
+import AuthorRoute from "./routes/authorRoute";
 
 dotenv.config();
 const PORT = process.env.PORT;
@@ -83,6 +87,15 @@ app.use("/user", paymentRouterInstance.getRouter());
 const webhookController = new WebhookController();
 const webhookRouter = new WebhookRoute(webhookController);
 app.use("/api", webhookRouter.getRouter());
+
+//authorService
+
+container.bind<IAuthorService>("IAuthorService").to(AuthorService);
+const authorService = container.get<IAuthorService>("IAuthorService");
+const authorController = new AuthorController(authorService);
+const authorRouterInstance = new AuthorRoute(authorController);
+app.use("/user", authorRouterInstance.getRouter());
+
 
 sequelize
   .authenticate()
